@@ -15,6 +15,7 @@ categories.workspace = true
 proc-macro = true
 
 [dependencies]
+cssparser = "0.36"
 html-escape.workspace = true
 proc-macro2 = "1"
 quote = "1"

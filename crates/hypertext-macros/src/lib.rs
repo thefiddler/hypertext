@@ -1,5 +1,6 @@
 #![expect(missing_docs)]
 
+mod css;
 mod derive;
 mod html;
 mod renderable;
@@ -103,6 +104,13 @@ pub fn html_file(tokens: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn html_file_borrow(tokens: TokenStream) -> TokenStream {
     generate_file::<Document<Rsx>>(Config::Lazy(Semantics::Borrow), tokens)
+}
+
+#[proc_macro]
+pub fn css(tokens: TokenStream) -> TokenStream {
+    css::generate(tokens.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
 }
 
 #[proc_macro_derive(Renderable, attributes(maud, rsx, attribute))]
