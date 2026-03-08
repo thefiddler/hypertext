@@ -10,7 +10,7 @@ enum Prev {
     Close,
 }
 
-fn tokens_to_css(tokens: TokenStream) -> String {
+pub fn tokens_to_css(tokens: TokenStream) -> String {
     let mut out = String::new();
     let mut prev = Prev::None;
     write_tokens(&mut out, &mut prev, tokens);
@@ -55,7 +55,7 @@ fn write_tokens(out: &mut String, prev: &mut Prev, tokens: TokenStream) {
     }
 }
 
-fn validate_css(css: &str, span: Span) -> syn::Result<()> {
+pub fn validate_css(css: &str, span: Span) -> syn::Result<()> {
     let mut input = cssparser::ParserInput::new(css);
     let mut parser = cssparser::Parser::new(&mut input);
 
@@ -95,5 +95,5 @@ pub fn generate(tokens: TokenStream) -> syn::Result<TokenStream> {
     let css_string = tokens_to_css(tokens);
     validate_css(&css_string, Span::call_site())?;
     let lit = LitStr::new(&css_string, Span::mixed_site());
-    Ok(quote! { ::hypertext::Raw::dangerously_create(#lit) })
+    Ok(quote! { ::hypertext::Raw::<_, ::hypertext::context::Node>::dangerously_create(#lit) })
 }

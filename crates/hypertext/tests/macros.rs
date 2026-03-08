@@ -764,22 +764,44 @@ fn mathml_rsx_simple() {
 }
 
 #[test]
-fn css_basic() {
-    let result = rsx! { <style>(css! { .foo { color: red } })</style> }.render();
+fn css_standalone() {
+    let raw = css! { .foo { color: red } };
+    assert_eq!(raw.into_inner(), ".foo{color:red}");
+}
+
+#[test]
+fn css_standalone_media_query() {
+    let raw = css! {
+        @media (max-width: 768px) {
+            .container { display: none }
+        }
+    };
     assert_eq!(
-        result.as_inner(),
-        "<style>.foo{color:red}</style>"
+        raw.into_inner(),
+        "@media(max-width:768px){.container{display:none}}"
     );
 }
 
 #[test]
-fn css_media_query() {
+fn inline_style_rsx() {
     let result = rsx! {
-        <style>(css! {
+        <style> .container { color: red; display: flex } </style>
+    }
+    .render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>.container{color:red;display:flex}</style>"
+    );
+}
+
+#[test]
+fn inline_style_rsx_media_query() {
+    let result = rsx! {
+        <style>
             @media (max-width: 768px) {
                 .container { display: none }
             }
-        })</style>
+        </style>
     }
     .render();
     assert_eq!(
@@ -789,10 +811,49 @@ fn css_media_query() {
 }
 
 #[test]
-fn css_in_maud() {
-    let result = maud! { style { (css! { body { margin: 0 } }) } }.render();
+fn inline_style_maud() {
+    let result = maud! {
+        style { .container { color: red; display: flex } }
+    }
+    .render();
     assert_eq!(
         result.as_inner(),
-        "<style>body{margin:0}</style>"
+        "<style>.container{color:red;display:flex}</style>"
+    );
+}
+
+#[test]
+fn inline_style_maud_media_query() {
+    let result = maud! {
+        style {
+            @media (max-width: 768px) {
+                .container { display: none }
+            }
+        }
+    }
+    .render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>@media(max-width:768px){.container{display:none}}</style>"
+    );
+}
+
+#[test]
+fn inline_style_empty() {
+    let rsx_result = rsx! { <style></style> }.render();
+    let maud_result = maud! { style {} }.render();
+    assert_eq!(rsx_result.as_inner(), "<style></style>");
+    assert_eq!(maud_result.as_inner(), "<style></style>");
+}
+
+#[test]
+fn inline_style_with_attrs() {
+    let result = rsx! {
+        <style id="main-css"> body { margin: 0 } </style>
+    }
+    .render();
+    assert_eq!(
+        result.as_inner(),
+        r#"<style id="main-css">body{margin:0}</style>"#
     );
 }

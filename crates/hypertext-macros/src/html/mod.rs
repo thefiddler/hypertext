@@ -426,6 +426,20 @@ impl<S: Syntax> Generate for Element<S> {
                 g.push_lits(name.lits());
                 g.push_str(">");
             }
+            ElementBody::RawContent {
+                content,
+                closing_name,
+            } => {
+                let name = closing_name.as_ref().map_or(&self.name, |closing_name| {
+                    el_checks.set_closing_spans(closing_name.spans());
+                    closing_name
+                });
+
+                g.push_lits(vec![LitStr::new(content, Span::mixed_site())]);
+                g.push_str("</");
+                g.push_lits(name.lits());
+                g.push_str(">");
+            }
             ElementBody::Void { solidus } => {
                 if matches!(flavour, NodeFlavour::Xml(_)) && solidus.is_none() {
                     let span = self
@@ -452,6 +466,10 @@ pub enum ElementBody<S: Syntax> {
         children: Many<Node<S>>,
         closing_name: Option<UnquotedName>,
     },
+    RawContent {
+        content: String,
+        closing_name: Option<UnquotedName>,
+    },
     Void {
         solidus: Option<Span>,
     },
@@ -459,7 +477,10 @@ pub enum ElementBody<S: Syntax> {
 
 impl<S: Syntax> ElementBody<S> {
     const fn element_kind(&self, flavour: NodeFlavour) -> ElementKind {
-        flavour.element_kind(matches!(self, Self::Void { .. }))
+        match self {
+            Self::Normal { .. } | Self::RawContent { .. } => flavour.element_kind(false),
+            Self::Void { .. } => flavour.element_kind(true),
+        }
     }
 }
 
