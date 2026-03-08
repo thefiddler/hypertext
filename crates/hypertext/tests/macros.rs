@@ -762,3 +762,37 @@ fn mathml_rsx_simple() {
         "<math><mi>a</mi><mo>+</mo><mi>b</mi></math>"
     );
 }
+
+#[test]
+fn css_basic() {
+    let result = rsx! { <style>(css! { .foo { color: red } })</style> }.render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>.foo{color:red}</style>"
+    );
+}
+
+#[test]
+fn css_media_query() {
+    let result = rsx! {
+        <style>(css! {
+            @media (max-width: 768px) {
+                .container { display: none }
+            }
+        })</style>
+    }
+    .render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>@media(max-width:768px){.container{display:none}}</style>"
+    );
+}
+
+#[test]
+fn css_in_maud() {
+    let result = maud! { style { (css! { body { margin: 0 } }) } }.render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>body{margin:0}</style>"
+    );
+}

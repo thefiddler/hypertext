@@ -1,5 +1,6 @@
 #![expect(missing_docs)]
 
+mod css;
 mod derive;
 mod html;
 mod renderable;
@@ -177,6 +178,13 @@ create_file_variants! {
     syntax = Rsx;
     flavour = NodeFlavour::Html;
     html_file html_file_borrow
+}
+
+#[proc_macro]
+pub fn css(tokens: TokenStream) -> TokenStream {
+    css::generate(tokens.into())
+        .unwrap_or_else(|err| err.to_compile_error())
+        .into()
 }
 
 #[proc_macro_derive(Renderable, attributes(maud, rsx, attribute))]
