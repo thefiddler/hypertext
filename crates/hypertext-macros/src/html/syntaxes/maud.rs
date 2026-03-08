@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream};
 use syn::{
     Ident, LitBool, LitChar, LitFloat, LitInt, LitStr, Token, braced,
     ext::IdentExt,
@@ -75,26 +75,40 @@ impl Parse for Group<Node<Maud>> {
 
 impl Parse for Element<Maud> {
     fn parse(input: ParseStream) -> syn::Result<Self> {
+        let name: UnquotedName = input.parse()?;
+
+        let mut attrs = Vec::new();
+
+        if input.peek(Token![#]) {
+            attrs.push(input.call(Attribute::parse_id)?);
+        }
+
+        if input.peek(Token![.]) {
+            attrs.push(input.call(Attribute::parse_class_list)?);
+        }
+
+        while !(input.peek(Token![;]) || input.peek(Brace)) {
+            attrs.push(input.parse()?);
+        }
+
+        let body = if name.is_raw_text_element() && input.peek(Brace) {
+            let content;
+            braced!(content in input);
+            let raw_tokens: TokenStream = content.parse()?;
+            let css_string = crate::css::tokens_to_css(raw_tokens);
+            crate::css::validate_css(&css_string, name.first_span())?;
+            ElementBody::RawContent {
+                content: css_string,
+                closing_name: None,
+            }
+        } else {
+            input.parse()?
+        };
+
         Ok(Self {
-            name: input.parse()?,
-            attrs: {
-                let mut attrs = Vec::new();
-
-                if input.peek(Token![#]) {
-                    attrs.push(input.call(Attribute::parse_id)?);
-                }
-
-                if input.peek(Token![.]) {
-                    attrs.push(input.call(Attribute::parse_class_list)?);
-                }
-
-                while !(input.peek(Token![;]) || input.peek(Brace)) {
-                    attrs.push(input.parse()?);
-                }
-
-                attrs
-            },
-            body: input.parse()?,
+            name,
+            attrs,
+            body,
         })
     }
 }

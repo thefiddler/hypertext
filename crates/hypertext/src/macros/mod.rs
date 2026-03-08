@@ -328,24 +328,21 @@ pub use hypertext_macros::html_file;
 #[cfg_attr(all(docsrs, not(doctest)), doc(cfg(feature = "alloc")))]
 pub use hypertext_macros::html_file_borrow;
 /// Validates CSS syntax at compile time and returns it as a [`Raw<&str>`](crate::Raw)
-/// suitable for embedding inside `<style>` elements.
+/// suitable for embedding as raw content.
 ///
 /// CSS comments (`/* */`) are stripped by Rust's lexer. Single-quoted CSS
 /// strings must use double quotes instead.
+///
+/// Note: when using `<style>` elements in [`rsx!`] or [`maud!`], CSS is
+/// validated inline automatically — you don't need `css!` in that case.
 ///
 /// # Example
 ///
 /// ```
 /// use hypertext::prelude::*;
 ///
-/// let result = rsx! {
-///     <style>(css! { .container { color: red; display: flex } })</style>
-/// }.render();
-///
-/// assert_eq!(
-///     result.as_inner(),
-///     "<style>.container{color:red;display:flex}</style>"
-/// );
+/// let raw = css! { .container { color: red; display: flex } };
+/// assert_eq!(raw.into_inner(), ".container{color:red;display:flex}");
 /// ```
 #[cfg(feature = "alloc")]
 #[cfg_attr(all(docsrs, not(doctest)), doc(cfg(feature = "alloc")))]

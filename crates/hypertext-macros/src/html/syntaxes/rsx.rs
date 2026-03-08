@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use proc_macro2::{TokenStream, TokenTree};
 use syn::{
     Ident, LitBool, LitChar, LitFloat, LitInt, LitStr, Token,
     ext::IdentExt,
@@ -111,6 +112,41 @@ impl Node<Rsx> {
                 name,
                 attrs,
                 body: ElementBody::Void,
+            }))
+        } else if name.is_raw_text_element() {
+            let mut raw_tokens = TokenStream::new();
+
+            while !(input.peek(Token![<]) && input.peek2(Token![/])) {
+                if input.is_empty() {
+                    return Err(syn::Error::new(
+                        name.first_span(),
+                        "unclosed style element",
+                    ));
+                }
+                raw_tokens.extend(Some(input.parse::<TokenTree>()?));
+            }
+
+            let css_string = crate::css::tokens_to_css(raw_tokens);
+            crate::css::validate_css(&css_string, name.first_span())?;
+
+            input.parse::<Token![<]>()?;
+            input.parse::<Token![/]>()?;
+            let closing_name: UnquotedName = input.parse()?;
+            if closing_name != name {
+                return Err(syn::Error::new(
+                    closing_name.first_span(),
+                    "mismatched closing tag for style element",
+                ));
+            }
+            input.parse::<Token![>]>()?;
+
+            Ok(Self::Element(Element {
+                name,
+                attrs,
+                body: ElementBody::RawContent {
+                    content: css_string,
+                    closing_name: Some(closing_name),
+                },
             }))
         } else {
             let mut children = Vec::new();

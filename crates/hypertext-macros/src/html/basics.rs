@@ -49,12 +49,25 @@ impl UnquotedName {
         s
     }
 
+    pub fn is_raw_text_element(&self) -> bool {
+        matches!(
+            self.0.as_slice(),
+            [NameFragment::Ident(ident)] if ident == "style"
+        )
+    }
+
     pub fn is_component(&self) -> bool {
         matches!(
             self.0.as_slice(),
             [NameFragment::Ident(ident)]
                 if ident.to_string().chars().next().is_some_and(|c| c.is_ascii_uppercase())
         )
+    }
+
+    pub fn first_span(&self) -> Span {
+        self.0
+            .first()
+            .map_or_else(Span::call_site, NameFragment::span)
     }
 
     pub fn spans(&self) -> Vec<Span> {

@@ -356,6 +356,20 @@ impl<S: Syntax> Generate for Element<S> {
                 g.push_lits(name.lits());
                 g.push_str(">");
             }
+            ElementBody::RawContent {
+                content,
+                closing_name,
+            } => {
+                let name = closing_name.as_ref().map_or(&self.name, |closing_name| {
+                    el_checks.set_closing_spans(closing_name.spans());
+                    closing_name
+                });
+
+                g.push_lits(vec![LitStr::new(content, Span::mixed_site())]);
+                g.push_str("</");
+                g.push_lits(name.lits());
+                g.push_str(">");
+            }
             ElementBody::Void => {}
         }
 
@@ -368,13 +382,17 @@ pub enum ElementBody<S: Syntax> {
         children: Many<Node<S>>,
         closing_name: Option<UnquotedName>,
     },
+    RawContent {
+        content: String,
+        closing_name: Option<UnquotedName>,
+    },
     Void,
 }
 
 impl<S: Syntax> ElementBody<S> {
     const fn kind(&self) -> ElementKind {
         match self {
-            Self::Normal { .. } => ElementKind::Normal,
+            Self::Normal { .. } | Self::RawContent { .. } => ElementKind::Normal,
             Self::Void => ElementKind::Void,
         }
     }
