@@ -531,6 +531,74 @@ pub trait AlpineJsAttributes: GlobalAttributes {
 
 impl<T: GlobalAttributes> AlpineJsAttributes for T {}
 
+/// Attributes for use with [Datastar](https://data-star.dev/).
+pub trait DatastarAttributes: GlobalAttributes {
+    /// Handle events (`data-on:click`, `data-on:submit`, etc.)
+    const data_on: AttributeNamespace = AttributeNamespace;
+
+    /// Dynamically set HTML attributes (`data-attr:disabled`, etc.)
+    const data_attr: AttributeNamespace = AttributeNamespace;
+
+    /// Conditionally add/remove CSS classes (`data-class:hidden`, etc.)
+    const data_class: AttributeNamespace = AttributeNamespace;
+
+    /// Dynamically set inline styles (`data-style:color`, etc.)
+    const data_style: AttributeNamespace = AttributeNamespace;
+
+    /// Create computed signals (`data-computed:fullName`, etc.)
+    const data_computed: AttributeNamespace = AttributeNamespace;
+
+    /// Two-way bind a signal to an element (`data-bind:value` or `data-bind`)
+    const data_bind: AttributeNamespace = AttributeNamespace;
+
+    /// Reference an element (`data-ref:myEl` or `data-ref`)
+    const data_ref: AttributeNamespace = AttributeNamespace;
+
+    /// Set a loading indicator signal (`data-indicator:mySignal` or `data-indicator`)
+    const data_indicator: AttributeNamespace = AttributeNamespace;
+
+    /// Create/merge signals (`data-signals:name="val"` or `data-signals="{...}"`)
+    const data_signals: AttributeNamespace = AttributeNamespace;
+
+    /// Set the text content of an element
+    const data_text: Attribute = Attribute;
+
+    /// Toggle the visibility of an element
+    const data_show: Attribute = Attribute;
+
+    /// Initialize a Datastar component
+    const data_init: Attribute = Attribute;
+
+    /// Run reactive side effects
+    const data_effect: Attribute = Attribute;
+
+    /// Load signals from JSON
+    const data_json_signals: Attribute = Attribute;
+
+    /// Ignore this element during Datastar processing
+    const data_ignore: Attribute = Attribute;
+
+    /// Ignore this element during morphing
+    const data_ignore_morph: Attribute = Attribute;
+
+    /// Preserve specific attributes during morphing
+    const data_preserve_attr: Attribute = Attribute;
+
+    /// Set up an interval-based event
+    const data_on_interval: Attribute = Attribute;
+
+    /// Set up an intersection observer event
+    const data_on_intersect: Attribute = Attribute;
+
+    /// React to signal patches
+    const data_on_signal_patch: Attribute = Attribute;
+
+    /// Filter signal patch events
+    const data_on_signal_patch_filter: Attribute = Attribute;
+}
+
+impl<T: GlobalAttributes> DatastarAttributes for T {}
+
 #[expect(missing_docs)]
 pub trait MathMlGlobalAttributes: Element {
     const autofocus: Attribute = Attribute;

@@ -1,0 +1,5 @@
+error: invalid JS expression: Unexpected token
+ --> tests/datastar-js-fail/invalid_show.rs:3:46
+  |
+3 |     let _ = hypertext::maud! { div data-show="{{" {} };
+  |                                              ^^^^

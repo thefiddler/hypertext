@@ -15,11 +15,16 @@ categories.workspace = true
 proc-macro = true
 
 [features]
+datastar = []
+datastar-js = ["datastar", "dep:oxc_parser", "dep:oxc_allocator", "dep:oxc_span"]
 lightningcss = ["dep:lightningcss"]
 
 [dependencies]
 lightningcss = { version = "1.0.0-alpha.71", optional = true, default-features = false }
 cssparser = "0.36"
+oxc_allocator = { version = "0.116", optional = true }
+oxc_parser = { version = "0.116", optional = true }
+oxc_span = { version = "0.116", optional = true }
 html-escape.workspace = true
 proc-macro2 = "1"
 quote = "1"

@@ -912,3 +912,98 @@ fn css_valid_properties() {
     };
     assert!(raw.into_inner().contains("color:red"));
 }
+
+#[test]
+#[cfg(feature = "datastar")]
+#[allow(clippy::too_many_lines)]
+fn datastar() {
+    let tests = [
+        // Simple attributes
+        (
+            maud! { div data-show="$isVisible" {} }.render(),
+            r#"<div data-show="$isVisible"></div>"#,
+        ),
+        (
+            rsx! { <div data-show="$isVisible"></div> }.render(),
+            r#"<div data-show="$isVisible"></div>"#,
+        ),
+        (
+            maud! { div data-text="$message" {} }.render(),
+            r#"<div data-text="$message"></div>"#,
+        ),
+        (
+            maud! { div data-init="$count = 0" {} }.render(),
+            r#"<div data-init="$count = 0"></div>"#,
+        ),
+        (
+            maud! { div data-effect="console.log($count)" {} }.render(),
+            r#"<div data-effect="console.log($count)"></div>"#,
+        ),
+        (
+            maud! { div data-ignore {} }.render(),
+            "<div data-ignore></div>",
+        ),
+        (
+            maud! { div data-ignore-morph {} }.render(),
+            "<div data-ignore-morph></div>",
+        ),
+        // Namespaced attributes
+        (
+            maud! { button data-on:click="$count++" {} }.render(),
+            r#"<button data-on:click="$count++"></button>"#,
+        ),
+        (
+            rsx! { <button data-on:click="$count++"></button> }.render(),
+            r#"<button data-on:click="$count++"></button>"#,
+        ),
+        (
+            maud! { div data-attr:disabled="$isDisabled" {} }.render(),
+            r#"<div data-attr:disabled="$isDisabled"></div>"#,
+        ),
+        (
+            maud! { div data-class:hidden="!$isVisible" {} }.render(),
+            r#"<div data-class:hidden="!$isVisible"></div>"#,
+        ),
+        (
+            maud! { div data-style:color="$color" {} }.render(),
+            r#"<div data-style:color="$color"></div>"#,
+        ),
+        (
+            maud! { div data-computed:fullName="$firstName + ' ' + $lastName" {} }.render(),
+            r#"<div data-computed:fullName="$firstName + ' ' + $lastName"></div>"#,
+        ),
+        (
+            maud! { input data-bind:value; }.render(),
+            r#"<input data-bind:value>"#,
+        ),
+        (
+            maud! { input data-bind="username"; }.render(),
+            r#"<input data-bind="username">"#,
+        ),
+        (
+            maud! { div data-signals:count="0" {} }.render(),
+            r#"<div data-signals:count="0"></div>"#,
+        ),
+        (
+            maud! { div data-ref="myEl" {} }.render(),
+            r#"<div data-ref="myEl"></div>"#,
+        ),
+        (
+            maud! { div data-indicator="loading" {} }.render(),
+            r#"<div data-indicator="loading"></div>"#,
+        ),
+        // Unknown data-* attrs should still pass through
+        (
+            maud! { div data-testid="my-component" {} }.render(),
+            r#"<div data-testid="my-component"></div>"#,
+        ),
+        (
+            rsx! { <div data-testid="my-component"></div> }.render(),
+            r#"<div data-testid="my-component"></div>"#,
+        ),
+    ];
+
+    for (result, expected) in tests {
+        assert_eq!(result.as_inner(), expected);
+    }
+}

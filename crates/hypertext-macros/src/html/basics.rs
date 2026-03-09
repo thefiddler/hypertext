@@ -49,6 +49,26 @@ impl UnquotedName {
         s
     }
 
+    /// Split at the first colon, returning (prefix fragments, has_colon).
+    #[cfg(feature = "datastar")]
+    pub fn split_at_colon(&self) -> (Self, bool) {
+        if let Some(pos) = self
+            .0
+            .iter()
+            .position(|f| matches!(f, NameFragment::Colon(_)))
+        {
+            (Self(self.0[..pos].to_vec()), true)
+        } else {
+            (self.clone(), false)
+        }
+    }
+
+    /// Display-friendly string (preserves hyphens, colons, dots as-is).
+    #[cfg(feature = "datastar-js")]
+    pub fn display_string(&self) -> String {
+        self.0.iter().map(|f| f.to_string()).collect()
+    }
+
     pub fn is_raw_text_element(&self) -> bool {
         matches!(
             self.0.as_slice(),

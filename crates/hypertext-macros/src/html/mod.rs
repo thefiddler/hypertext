@@ -430,9 +430,38 @@ impl Attribute {
     }
 }
 
+impl Attribute {
+    #[cfg(feature = "datastar-js")]
+    fn validate_datastar_value(&self) -> syn::Result<()> {
+        use crate::js;
+
+        // Only validate data-* attributes with string literal values
+        let AttributeName::Data { rest, .. } = &self.name else {
+            return Ok(());
+        };
+        let AttributeKind::Value {
+            value: AttributeValue::Literal(Literal::Str(lit)),
+            ..
+        } = &self.kind
+        else {
+            return Ok(());
+        };
+
+        let rest_str = rest.display_string();
+        let span = lit.span();
+        let value = lit.value();
+
+        match js::datastar_value_kind(&rest_str) {
+            js::JsValueKind::Expression => js::validate_js_expression(&value, span),
+            js::JsValueKind::ObjectLiteral => js::validate_js_object(&value, span),
+            js::JsValueKind::None => Ok(()),
+        }
+    }
+}
+
 impl Parse for Attribute {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(Self {
+        let attr = Self {
             name: input.parse()?,
             kind: if input.peek(Token![=]) {
                 input.parse::<Token![=]>()?;
@@ -448,7 +477,12 @@ impl Parse for Attribute {
             } else {
                 AttributeKind::Empty(input.call(Toggle::parse_optional)?)
             },
-        })
+        };
+
+        #[cfg(feature = "datastar-js")]
+        attr.validate_datastar_value()?;
+
+        Ok(attr)
     }
 }
 
@@ -538,7 +572,50 @@ pub enum AttributeName {
 impl AttributeName {
     fn check(&self) -> Option<AttributeCheck> {
         match self {
-            Self::Data { .. } | Self::Unchecked(_) => None,
+            #[cfg(feature = "datastar")]
+            Self::Data { rest, .. } => {
+                const KNOWN_NS: &[&str] = &[
+                    "on", "attr", "class", "style", "computed", "bind", "ref", "indicator",
+                    "signals",
+                ];
+                const KNOWN_SIMPLE: &[&str] = &[
+                    "show",
+                    "text",
+                    "init",
+                    "effect",
+                    "ignore",
+                    "ignore_morph",
+                    "preserve_attr",
+                    "json_signals",
+                    "on_interval",
+                    "on_intersect",
+                    "on_signal_patch",
+                    "on_signal_patch_filter",
+                ];
+
+                let (prefix, has_colon) = rest.split_at_colon();
+                let prefix_ident = prefix.ident_string();
+                let full_ident = format!("data_{prefix_ident}");
+
+                if has_colon || KNOWN_NS.contains(&prefix_ident.as_str()) {
+                    Some(AttributeCheck::new(
+                        AttributeCheckKind::Namespace,
+                        full_ident,
+                        prefix.spans(),
+                    ))
+                } else if KNOWN_SIMPLE.contains(&prefix_ident.as_str()) {
+                    Some(AttributeCheck::new(
+                        AttributeCheckKind::Normal,
+                        full_ident,
+                        prefix.spans(),
+                    ))
+                } else {
+                    None // unknown data-* attr, allow through
+                }
+            }
+            #[cfg(not(feature = "datastar"))]
+            Self::Data { .. } => None,
+            Self::Unchecked(_) => None,
             Self::Namespace { namespace, .. } => Some(AttributeCheck::new(
                 AttributeCheckKind::Namespace,
                 namespace.ident_string(),

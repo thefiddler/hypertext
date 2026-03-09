@@ -1,0 +1,5 @@
+error: invalid JS expression: Unexpected token
+ --> tests/datastar-js-fail/invalid_expression.rs:3:53
+  |
+3 |     let _ = hypertext::maud! { button data-on:click="if (" {} };
+  |                                                     ^^^^^^
