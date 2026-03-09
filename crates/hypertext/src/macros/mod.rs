@@ -336,6 +336,10 @@ pub use hypertext_macros::html_file_borrow;
 /// Note: when using `<style>` elements in [`rsx!`] or [`maud!`], CSS is
 /// validated inline automatically — you don't need `css!` in that case.
 ///
+/// By default, validation is token-level only (via `cssparser`). Enable the
+/// `lightningcss` feature for full property-name, property-value, and
+/// selector validation.
+///
 /// # Example
 ///
 /// ```

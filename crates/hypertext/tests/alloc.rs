@@ -897,3 +897,18 @@ fn inline_style_with_attrs() {
         r#"<style id="main-css">body{margin:0}</style>"#
     );
 }
+
+#[test]
+fn css_valid_properties() {
+    // This CSS is valid under both cssparser (token-level) and lightningcss (property-level).
+    let raw = css! {
+        .card {
+            color: red;
+            background-color: #fff;
+            display: flex;
+            margin: 0 auto;
+            font-size: 16px
+        }
+    };
+    assert!(raw.into_inner().contains("color:red"));
+}
