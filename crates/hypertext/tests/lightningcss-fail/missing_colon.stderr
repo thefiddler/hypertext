@@ -1,0 +1,7 @@
+error: CSS error: Unexpected token Ident("red") at :0:11
+ --> tests/lightningcss-fail/missing_colon.rs:4:13
+  |
+4 |     let _ = hypertext::css! { .foo { color red } };
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `hypertext::css` (in Nightly builds, run with -Z macro-backtrace for more info)

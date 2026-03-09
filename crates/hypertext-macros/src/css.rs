@@ -55,6 +55,16 @@ fn write_tokens(out: &mut String, prev: &mut Prev, tokens: TokenStream) {
     }
 }
 
+#[cfg(feature = "lightningcss")]
+pub fn validate_css(css: &str, span: Span) -> syn::Result<()> {
+    use lightningcss::stylesheet::{ParserOptions, StyleSheet};
+
+    StyleSheet::parse(css, ParserOptions::default())
+        .map(|_| ())
+        .map_err(|e| syn::Error::new(span, format!("CSS error: {e}")))
+}
+
+#[cfg(not(feature = "lightningcss"))]
 pub fn validate_css(css: &str, span: Span) -> syn::Result<()> {
     let mut input = cssparser::ParserInput::new(css);
     let mut parser = cssparser::Parser::new(&mut input);
@@ -63,6 +73,7 @@ pub fn validate_css(css: &str, span: Span) -> syn::Result<()> {
         .map_err(|_| syn::Error::new(span, format!("invalid CSS: `{css}`")))
 }
 
+#[cfg(not(feature = "lightningcss"))]
 fn exhaust<'i>(
     parser: &mut cssparser::Parser<'i, '_>,
 ) -> Result<(), cssparser::ParseError<'i, ()>> {
