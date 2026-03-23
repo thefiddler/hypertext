@@ -49,6 +49,10 @@ impl UnquotedName {
         s
     }
 
+    /// Returns true for elements whose children should be parsed as raw text
+    /// (CSS tokens) rather than normal HTML/RSX nodes. Currently limited to
+    /// `<style>` — `<script>` is intentionally excluded since there is no
+    /// compile-time JS validation to perform.
     pub fn is_raw_text_element(&self) -> bool {
         matches!(
             self.0.as_slice(),

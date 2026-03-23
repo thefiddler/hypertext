@@ -65,7 +65,11 @@ fn write_source_tokens(
                 };
                 out.push_str(open);
 
-                // Position right after the opening delimiter.
+                // Position right after the opening delimiter. We use the
+                // delimiter's line, which is technically wrong when content
+                // starts on the next line — but `has_gap` checks line
+                // inequality first, so a line mismatch always yields a space
+                // regardless of the column value.
                 *last_end = if delim != Delimiter::None {
                     Some(LineColumn {
                         line: start.line,
@@ -312,8 +316,13 @@ fn exhaust<'i>(
 // ---------------------------------------------------------------------------
 
 pub fn generate(tokens: TokenStream) -> syn::Result<TokenStream> {
+    let err_span = tokens
+        .clone()
+        .into_iter()
+        .next()
+        .map_or_else(Span::call_site, |tt| tt.span());
     let css_string = tokens_to_css(tokens);
-    validate_css(&css_string, Span::call_site())?;
+    validate_css(&css_string, err_span)?;
     let lit = LitStr::new(&css_string, Span::mixed_site());
     Ok(quote! { ::hypertext::Raw::<_, ::hypertext::context::Node>::dangerously_create(#lit) })
 }

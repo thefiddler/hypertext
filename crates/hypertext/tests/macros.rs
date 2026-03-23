@@ -923,3 +923,33 @@ fn inline_style_descendant_maud() {
         "<style>.nav .item{color:blue}</style>"
     );
 }
+
+#[test]
+fn css_child_combinator() {
+    let raw = css! { ul > li { list-style: none } };
+    assert_eq!(raw.into_inner(), "ul > li{list-style:none}");
+}
+
+#[test]
+fn css_adjacent_sibling() {
+    let raw = css! { h1 + p { margin-top: 0 } };
+    assert_eq!(raw.into_inner(), "h1 + p{margin-top:0}");
+}
+
+#[test]
+fn css_general_sibling() {
+    let raw = css! { h1 ~ p { color: gray } };
+    assert_eq!(raw.into_inner(), "h1 ~ p{color:gray}");
+}
+
+#[test]
+fn css_string_value() {
+    let raw = css! { div::after { content: "hello" } };
+    assert_eq!(raw.into_inner(), r#"div::after{content:"hello"}"#);
+}
+
+#[test]
+fn css_nested_functions() {
+    let raw = css! { .box { width: calc(100% - var(--gap)) } };
+    assert_eq!(raw.into_inner(), ".box{width:calc(100% - var(--gap))}");
+}
