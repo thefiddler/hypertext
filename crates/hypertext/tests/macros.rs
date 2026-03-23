@@ -872,6 +872,54 @@ fn css_valid_properties() {
     };
     assert_eq!(
         raw.into_inner(),
-        ".card{color:red;background-color:#fff;display:flex;margin:0 auto;padding:1rem 2rem}"
+        ".card{color:red;background-color:#fff;display:flex;margin:0 auto;padding:1rem 2rem;}"
+    );
+}
+
+#[test]
+fn css_descendant_selector() {
+    let raw = css! { .nav .item { color: red } };
+    assert_eq!(raw.into_inner(), ".nav .item{color:red}");
+}
+
+#[test]
+fn css_compound_vs_descendant() {
+    let raw = css! { .nav.active { color: blue } };
+    assert_eq!(raw.into_inner(), ".nav.active{color:blue}");
+}
+
+#[test]
+fn css_element_descendant() {
+    let raw = css! { div p { margin: 0 } };
+    assert_eq!(raw.into_inner(), "div p{margin:0}");
+}
+
+#[test]
+fn css_calc_expression() {
+    let raw = css! { .box { width: calc(100% - 2rem) } };
+    assert_eq!(raw.into_inner(), ".box{width:calc(100% - 2rem)}");
+}
+
+#[test]
+fn inline_style_descendant_rsx() {
+    let result = rsx! {
+        <style> .nav .item { color: blue } </style>
+    }
+    .render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>.nav .item{color:blue}</style>"
+    );
+}
+
+#[test]
+fn inline_style_descendant_maud() {
+    let result = maud! {
+        style { .nav .item { color: blue } }
+    }
+    .render();
+    assert_eq!(
+        result.as_inner(),
+        "<style>.nav .item{color:blue}</style>"
     );
 }

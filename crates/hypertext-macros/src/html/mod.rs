@@ -435,6 +435,7 @@ impl<S: Syntax> Generate for Element<S> {
                     closing_name
                 });
 
+                g.push_str(">");
                 g.push_lits(vec![LitStr::new(content, Span::mixed_site())]);
                 g.push_str("</");
                 g.push_lits(name.lits());

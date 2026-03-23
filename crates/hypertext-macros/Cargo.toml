@@ -21,7 +21,7 @@ lightningcss = ["dep:lightningcss"]
 lightningcss = { version = "1.0.0-alpha.71", optional = true, default-features = false }
 cssparser = "0.36"
 html-escape.workspace = true
-proc-macro2 = "1"
+proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1"
 syn = { version = "2", features = ["extra-traits", "full"] }
 
